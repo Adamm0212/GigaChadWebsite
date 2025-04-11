@@ -50,18 +50,23 @@
       const apiKey = 'b532f699dc8c8bad35e0908d1e794548'; // Your personal API key
 
       // Build the URL for the API call
-      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-
+      const url_coord = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`; // URL for coordinates
       try {
+        const response_coord = await fetch(url_coord); // Call the API for coordinates
+        const data_coord = await response_coord.json(); // Convert response to JSON
+        let lat = data_coord[0].lat; // Get latitude from response
+        let lon = data_coord[0].lon; // Get longitude from response
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`; // URL for weather data
         const response = await fetch(url); // Call the API
         const data = await response.json(); // Convert response to JSON
-
+        console.log(data); // Log the data for debugging
         if (data.cod === 200) {
           // If the API returns success
           document.getElementById('weatherResult').innerHTML = `
             <p><strong>${data.name}</strong></p>
             <p>${data.weather[0].description}</p>
-            <p>Temperature: ${data.main.temp}°C</p>
+            <p>Temperature: ${Math.round((data.main.temp - 272) * 100) / 100 }°C</p>
+            <p>Country: ${data_coord[0].country}</p>
           `;
         } else {
           // If the city is not found or there's an error
